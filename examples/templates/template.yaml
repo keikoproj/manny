@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  ChapiVersion:
+    Description: The version of the chapi template to use.
+    Type: String
+    Default: latest
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: >-
+      The VPC where the endpoint has to be deployed.
+  Port:
+    Type: Number
+    Description: The port to allow inbound from Direct Expert Access Egress CIDRs
+    Default: '443'
+
+Resources:
+  ExpertIngressSG:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - "https://raw.githubusercontent.com/awslabs/aws-cloudformation-templates/master/aws/services/EC2/EC2InstanceWithSecurityGroupSample.yaml"
+        - { Version: !Ref ChapiVersion }
+      Parameters:
+        VpcId:
+          Ref: VpcId
+        Port:
+          Ref: Port

@@ -1,0 +1,8 @@
+template:
+  type: http
+  path: "https://raw.githubusercontent.com/awslabs/aws-cloudformation-templates/master/aws/services/EC2/EC2InstanceWithSecurityGroupSample.yaml"
+parameters:
+  VpcName: "Test"
+stackname: "http-stack1"
+tags:
+  manny-generated: true

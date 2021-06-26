@@ -1,0 +1,8 @@
+template:
+  type: s3
+  path: "s3://cfn-usw2/S3_Bucket.template"
+parameters:
+  Port: 8080
+stackname: "s3-stack2"
+tags:
+  manny-generated: true

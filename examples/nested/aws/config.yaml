@@ -1,0 +1,6 @@
+timeout: 15
+servicerolearn: arn:aws:iam::123456789:role/cfn-sample-role
+duration: 20m
+externalID: 45JBASDA
+acctnum: 1234567
+expirywindow: 20m

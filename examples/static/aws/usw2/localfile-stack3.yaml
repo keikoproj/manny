@@ -1,0 +1,8 @@
+template:
+  type: file
+  path: ../../../templates/template.yaml
+parameters:
+  Port: 8080
+  vpcId: !stack_output ../foo/localfile-stack1.yaml::vpcId
+tags:
+  manny-generated: true

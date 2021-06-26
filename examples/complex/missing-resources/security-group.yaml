@@ -1,0 +1,8 @@
+template:
+  type: file
+  path: security_group_stack.txt
+parameters:
+  Port: 443
+stackname: "localfile-stack"
+tags:
+  manny-generated: true

@@ -1,0 +1,10 @@
+template:
+  type: file
+  path: ../../../templates/template.yaml
+parameters:
+  Port: 80
+stackname: "localfile-stack1"
+tags:
+  manny-generated: true
+rolearn: arn:aws:iam::527657872078:role/cfn-fa-role2
+timeout: 5

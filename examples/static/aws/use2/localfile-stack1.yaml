@@ -1,0 +1,11 @@
+template:
+  type: file
+  path: ../../../templates/template.yaml
+parameters:
+  Port: 80
+  vpcId: !environment_variable vpc_Id
+stackname: "localfile-stack1"
+tags:
+  manny-generated: true
+rolearn: arn:aws:iam::123456789:role/cfn-fa-role2
+syncwave: 3

@@ -1,0 +1,10 @@
+template:
+  type: file
+  path: ../../../templates/template.yaml
+parameters:
+  Port: 443
+  data: !file_contents ./sample.yaml
+  foo: !stack_output ../foo/vpc.yaml::vpcId
+stackname: "localfile-stack2"
+tags:
+  manny-generated: true

@@ -1,0 +1,4 @@
+base: ../config.yaml
+timeout: 10
+env: dev
+region: us-west-2

@@ -1,0 +1,7 @@
+parameters:
+  GOROOT: !environment_variable GOROOT
+  foo: !stack_output stack-1.yaml::vpcId
+stackname: test-0
+template:
+  type: file
+  path: ../templates/template.yaml
