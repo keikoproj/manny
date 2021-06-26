@@ -17,7 +17,7 @@ func Test_GitRepoRemote(t *testing.T) {
 		{
 			"Valid",
 			"../",
-			"keikoproj/manny.git",
+			"manny.git",
 			false,
 			"",
 		},
