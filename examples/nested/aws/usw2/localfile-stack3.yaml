@@ -1,0 +1,8 @@
+template:
+  type: file
+  path: ../../../templates/template.yaml
+parameters:
+  Port: 8080
+stackname: "localfile-stack3"
+tags:
+  manny-generated: true

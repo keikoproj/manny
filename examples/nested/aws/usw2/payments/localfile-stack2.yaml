@@ -1,0 +1,7 @@
+template:
+  type: file
+  path: ../../../../templates/template.yaml
+parameters:
+  Port: 1001
+tags:
+  manny-generated: true

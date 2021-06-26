@@ -1,0 +1,8 @@
+template:
+  type: file
+  path: ../../../templates/template.yaml
+parameters:
+  Port: 443
+stackname: "localfile-stack2"
+tags:
+  manny-generated: true

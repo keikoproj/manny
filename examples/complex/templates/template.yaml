@@ -1,0 +1,250 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates Custom VPC
+Metadata:
+  Name: chp-vpc-custom
+  Version: 0.2.3
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Name
+        Parameters:
+          - VpcName
+      - Label:
+          default: >-
+            Subnet Configuration:
+            VPC size CAN NOT EXCEED /16 or 65,534 IP addresses.
+            For example: The stack would not get created if you pick 6XL (/18) for both private
+            and alternate subnets. 6XL means 16k IP addresses and it would try to create 3 private
+            subnets and 3 alternate subnets each with 16k IP addresses, which adds up to 98k IP addresses.
+        Parameters:
+          - PrivateSubnetSize
+          - DataSubnetSize
+          - IngressSubnetSize
+          - EgressSubnetSize
+      - Label:
+          default: Alternate Subnet Configuration (optional)
+        Parameters:
+          - AlternateSubnetName
+          - AlternateSubnetSize
+          - AlternateSubnetRouteTableName
+
+    ParameterLabels:
+      VpcName:
+        default: VPC name
+      PrivateSubnetSize:
+        default: Size of the private subnet(s)
+      DataSubnetSize:
+        default: Size of the data subnet(s)
+      AlternateSubnetName:
+        default: Alternate subnet name
+      AlternateSubnetSize:
+        default: Size of the Alternate subnet(s)
+      AlternateSubnetRouteTableName:
+        default: Alternate subnet route table name
+      IngressSubnetSize:
+        default: Size of the Ingress subnet(s)
+      EgressSubnetSize:
+        default: Size of theEgress subnet(s)
+
+Parameters:
+  VpcName:
+    Type: String
+  PrivateSubnetSize:
+    Type: String
+    Default: M
+    AllowedValues:
+      - 2XS
+      - XS
+      - S
+      - M
+      - L
+      - XL
+      - 2XL
+      - 3XL
+      - 4XL
+      - 5XL
+      - 6XL
+    Description: >-
+      Size "2XS" supports up to 48 App/Web EC2 instances, Lambda functions or EMR clusters, Size "XS" supports 96 (2 * 2XS),
+      "S" supports 192 (2 * XS), and so on.
+  DataSubnetSize:
+    Type: String
+    Default: XS
+    AllowedValues:
+      - 2XS
+      - XS
+      - S
+      - M
+      - L
+      - XL
+      - 2XL
+      - 3XL
+      - 4XL
+      - 5XL
+      - 6XL
+    Description: >-
+      Size "2XS" can support 48 RDS/EC2 instances or ElastiCache clusters, Size "XS" supports 96 (2 * 2XS) RDS/EC2 instances or
+      ElastiCache clusters, "S" supports 192 (2 * XS), and so on.
+  AlternateSubnetName:
+    Type: String
+    Default: ""
+    Description: >-
+      Alternate subnet name
+  AlternateSubnetSize:
+    Type: String
+    Default: XS
+    AllowedValues:
+      - 2XS
+      - XS
+      - S
+      - M
+      - L
+      - XL
+      - 2XL
+      - 3XL
+      - 4XL
+      - 5XL
+      - 6XL
+    Description: >-
+      Size "2XS" supports up to 48 App/Web EC2 instances, Lambda functions or EMR clusters, Size "XS" supports 96 (2 * 2XS),
+      "S" supports 192 (2 * XS), and so on.
+  IngressSubnetSize:
+    Type: String
+    Default: XL
+    AllowedValues:
+      - S
+      - M
+      - L
+      - XL
+      - 2XL
+    Description: >-
+      Size "XL" supports up to 200 ELBs and "2XL" supports up to 400 (2 * XL) ELBs.
+  EgressSubnetSize:
+    Type: String
+    Default: XS
+    AllowedValues:
+      - XS
+    Description: >-
+      Egress subnets house NAT/Internet gateways. 96 private IP addresses are available for NAT/Internet gateways.
+  AlternateSubnetRouteTableName:
+    Type: String
+    Default: replication
+    AllowedValues:
+      - ingress
+      - egress
+      - private
+      - data
+      - replication
+    Description: >-
+      Name of the alternate subnet route table
+
+Mappings:
+  EnvMap:
+    Development:
+      AdminAccountId: 124755957763
+      AdminRegion: "us-west-2"
+    Production:
+      AdminAccountId: 427900722408
+      AdminRegion: "us-west-2"
+  CidrMap:
+    2XS:
+      SubnetSize: "28"
+    XS:
+      SubnetSize: "27"
+    S:
+      SubnetSize: "26"
+    M:
+      SubnetSize: "25"
+    L:
+      SubnetSize: "24"
+    XL:
+      SubnetSize: "23"
+    2XL:
+      SubnetSize: "22"
+    3XL:
+      SubnetSize: "21"
+    4XL:
+      SubnetSize: "20"
+    5XL:
+      SubnetSize: "19"
+    6XL:
+      SubnetSize: "18"
+
+Conditions:
+  CreateAlternateSubnet: !Not [!Equals [!Ref AlternateSubnetName, ""]]
+
+Resources:
+  uuidGenerator:
+    Type: Custom::uuidGenerator
+    Properties:
+      ServiceToken:
+        Fn::Sub:
+          - arn:aws:sns:${AWS::Region}:${AccountId}:uuid-generator-prd
+          - { AccountId: !FindInMap [EnvMap, Production, AdminAccountId] }
+      Account: !Sub ${AWS::AccountId}
+
+  AppCiRequester:
+    Type: Custom::AppCiRequester
+    Properties:
+      ServiceToken:
+        Fn::Sub:
+          - arn:aws:sns:${AWS::Region}:${AccountId}:aws-vpn-appci-prd
+          - { AccountId: !FindInMap [EnvMap, Production, AdminAccountId] }
+      AccountId: !Sub ${AWS::AccountId}
+      SessionId: !GetAtt uuidGenerator.SessionID
+
+  VpcCidrAllocator:
+    Type: Custom::VpcCidrAllocator
+    Properties:
+      ServiceToken:
+        Fn::Sub:
+          - arn:aws:sns:${AWS::Region}:${AccountId}:aws-vpn-cidr-prd
+          - { AccountId: !FindInMap [EnvMap, Production, AdminAccountId] }
+      Account: !Sub ${AWS::AccountId}
+      Region: !Sub ${AWS::Region}
+      Private: !FindInMap [CidrMap, !Ref PrivateSubnetSize, SubnetSize]
+      Data: !FindInMap [CidrMap, !Ref DataSubnetSize, SubnetSize]
+      Alternate: !If
+        - CreateAlternateSubnet
+        - !FindInMap [CidrMap, !Ref AlternateSubnetSize, SubnetSize]
+        - "0"
+      Ingress: !FindInMap [CidrMap, !Ref IngressSubnetSize, SubnetSize]
+      Egress: !FindInMap [CidrMap, !Ref EgressSubnetSize, SubnetSize]
+      SessionId: !GetAtt uuidGenerator.SessionID
+      VpcOnly: "true"
+      AppEnv: !GetAtt AppCiRequester.AppType
+
+  VpcStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3-us-west-2.amazonaws.com/patterns-artifacts-release/vpc-v2.7.2/cf_template_master.json
+      Parameters:
+        CidrBlock: !GetAtt VpcCidrAllocator.VpcCidr
+        CidrBlockPrivate: !GetAtt VpcCidrAllocator.PrivateSubnets
+        CidrBlockIngress: !GetAtt VpcCidrAllocator.IngressSubnets
+        CidrBlockEgress: !GetAtt VpcCidrAllocator.EgressSubnets
+        CidrBlockData: !GetAtt VpcCidrAllocator.DataSubnets
+        CidrBlockAlt1: !GetAtt VpcCidrAllocator.AlternateSubnets
+        TagCfnVersion: "2.1.2"
+        Alt1SubnetName: !If
+          - CreateAlternateSubnet
+          - !Ref AlternateSubnetName
+          - !Ref "AWS::NoValue"
+        Alt1SubnetRouteTable: !If
+          - CreateAlternateSubnet
+          - !Ref AlternateSubnetRouteTableName
+          - !Ref "AWS::NoValue"
+        CentralVpcLogAccount: "996354045376"
+        VpcFlowLogRentention: "7"
+        Region: !Sub ${AWS::Region}
+        InstanceTenancy: "default"
+        TagVpcName: !Ref VpcName
+        TagEnv: !GetAtt AppCiRequester.AppType
+        StackName: !Ref VpcName
+        ArtifactBucket: patterns-artifacts-release
+        ArtifactFolder: vpc-v2.7.2
+
+Outputs:
+  VpcId:
+    Value: !GetAtt VpcStack.Outputs.VpcId
+    Description: The VPC ID

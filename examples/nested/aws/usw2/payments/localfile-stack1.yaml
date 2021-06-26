@@ -1,0 +1,8 @@
+template:
+  type: file
+  path: ../../../../templates/template.yaml
+parameters:
+  Port: 1000
+tags:
+  manny-generated: true
+rolearn: arn:aws:iam::527657872078:role/cfn-fa-role2

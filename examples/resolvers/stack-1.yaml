@@ -1,0 +1,7 @@
+parameters:
+  GOPATH: !environment_variable GOPATH
+  data: !file_contents ./resolver.txt
+stackname: test-1
+template:
+  type: file
+  path: ../templates/template.yaml
